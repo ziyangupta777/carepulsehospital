@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Book Appointment — CarePulse Hospital{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container" style="max-width:780px;">
+    <div class="section-header">
+      <div>
+        <h1>Book a Hospital Appointment</h1>
+        <p>Choose an in-person clinic visit or telehealth video consultation.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <form method="post" action="{{ url_for('book_appointment') }}">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="patient_name">Patient Full Name</label>
+            <input class="form-control" id="patient_name" name="patient_name" required value="{{ current_patient.full_name if current_patient else '' }}" />
+          </div>
+          <div class="form-group">
+            <label for="patient_email">Email Address</label>
+            <input class="form-control" id="patient_email" type="email" name="patient_email" required value="{{ current_patient.email if current_patient else '' }}" />
+          </div>
+          <div class="form-group">
+            <label for="patient_phone">Phone Number</label>
+            <input class="form-control" id="patient_phone" name="patient_phone" required value="{{ current_patient.phone if current_patient else '' }}" />
+          </div>
+          <div class="form-group">
+            <label for="visit_type">Consultation Mode</label>
+            <select class="form-control" id="visit_type" name="visit_type">
+              <option value="In-Person">In-Person Hospital Visit</option>
+              <option value="Telehealth">Video Telehealth Visit</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="doctor_id">Select Specialist Doctor</label>
+          <select class="form-control" id="doctor_id" name="doctor_id" required>
+            <option value="">-- Choose a doctor --</option>
+            {% for doc in doctors %}
+              <option value="{{ doc.id }}" {% if selected_doctor_id == doc.id %}selected{% endif %}>
+                {{ doc.name }} — {{ doc.department_name }} (Rs. {{ doc.consultation_fee }})
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="appointment_date">Preferred Date</label>
+            <input class="form-control" id="appointment_date" type="date" name="appointment_date" min="{{ min_date }}" required />
+          </div>
+          <div class="form-group">
+            <label for="time_slot">Available Time Slot</label>
+            <select class="form-control" id="time_slot" name="time_slot" required>
+              {% for slot in time_slots %}
+                <option value="{{ slot }}">{{ slot }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reason">Health Concern / Symptoms</label>
+          <textarea class="form-control" id="reason" name="reason" rows="3" required placeholder="Briefly describe your symptoms, duration, or test follow-up..."></textarea>
+        </div>
+
+        <button class="btn btn-primary" type="submit">Confirm Appointment</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

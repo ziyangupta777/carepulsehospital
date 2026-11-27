@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Lab Report {{ report.report_code }} — CarePulse Hospital{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container" style="max-width:860px;">
+    <div class="no-print" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <a href="{{ url_for('portal') }}">&larr; Back to Patient Portal</a>
+      <button class="btn btn-primary btn-sm" type="button" onclick="window.print()">Print / Save PDF</button>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:18px;">
+        <div>
+          <span class="badge">{{ report.report_code }}</span>
+          <h1 style="margin:6px 0 4px;">{{ report.test_name }}</h1>
+          <p class="card-muted" style="margin:0;">Patient: <strong>{{ current_patient.full_name }}</strong> ({{ current_patient.gender }}, DOB {{ current_patient.date_of_birth }})</p>
+        </div>
+        <div style="text-align:right;">
+          <p style="margin:0;"><strong>Report Date:</strong> {{ report.report_date }}</p>
+          <p style="margin:4px 0;"><strong>Ordered By:</strong> {{ report.ordered_by }}</p>
+          <span class="badge {% if report.overall_status == 'Normal' %}badge-success{% else %}badge-warning{% endif %}">{{ report.overall_status }}</span>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Test Parameter</th>
+              <th>Observed Value</th>
+              <th>Reference Range</th>
+              <th>Interpretation</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in report.metrics %}
+            <tr>
+              <td><strong>{{ m.parameter }}</strong></td>
+              <td>{{ m.value }}</td>
+              <td>{{ m.range }}</td>
+              <td>
+                <span class="badge {% if m.status == 'Normal' %}badge-success{% elif m.status == 'Borderline' %}badge-warning{% else %}badge-danger{% endif %}">
+                  {{ m.status }}
+                </span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="alert alert-info" style="margin-top:20px;">
+        <strong>Physician Interpretation &amp; Follow-Up:</strong><br />
+        {{ report.summary_notes }}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

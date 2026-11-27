@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}A–Z Health Library — CarePulse Hospital{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <h1>A–Z Health Conditions &amp; Patient Guide</h1>
+        <p>Search by condition name, symptom, or medical department for verified treatment &amp; emergency guidance.</p>
+      </div>
+      <a class="btn btn-primary" href="{{ url_for('symptom_checker') }}">Not sure? Try Symptom Checker</a>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <form method="get" action="{{ url_for('health_library') }}" class="form-grid" style="align-items:end;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="q">Search Condition or Symptom</label>
+          <input class="form-control" id="q" name="q" value="{{ q }}" placeholder="e.g. fever, chest pain, migraine, asthma..." />
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="dept">Department</label>
+          <select class="form-control" id="dept" name="dept">
+            <option value="">All Departments</option>
+            {% for d in departments %}
+              <option value="{{ d.slug }}" {% if selected_dept == d.slug %}selected{% endif %}>{{ d.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-primary" type="submit">Apply Filters</button>
+          <a class="btn btn-outline" href="{{ url_for('health_library') }}">Reset</a>
+        </div>
+      </form>
+
+      <div class="alpha-bar">
+        <a class="alpha-pill {% if not selected_letter %}active{% endif %}" href="{{ url_for('health_library', q=q, dept=selected_dept) }}">All</a>
+        {% for letter in all_letters %}
+          <a class="alpha-pill {% if selected_letter == letter %}active{% endif %}" href="{{ url_for('health_library', letter=letter, q=q, dept=selected_dept) }}">{{ letter }}</a>
+        {% endfor %}
+      </div>
+    </div>
+
+    {% if not conditions %}
+      <div class="card">
+        <h3>No matching health conditions found</h3>
+        <p class="card-muted">Try clearing the filter or using our <a href="{{ url_for('symptom_checker') }}">Interactive Symptom Checker</a>.</p>
+      </div>
+    {% else %}
+      <div class="grid-2">
+        {% for cond in conditions %}
+        <article class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;">
+            <span class="badge">{{ cond.department_name }}</span>
+            <span class="badge {% if 'Emergency' in cond.urgency %}badge-danger{% elif 'Urgent' in cond.urgency %}badge-warning{% endif %}">{{ cond.urgency }}</span>
+          </div>
+          <h3>{{ cond.name }}</h3>
+          <p class="card-muted">{{ cond.summary }}</p>
+          <p style="font-size:0.88rem;"><strong>Key Symptoms:</strong> {{ cond.symptoms | join(', ') }}</p>
+          <div style="display:flex;gap:10px;margin-top:12px;">
+            <a class="btn btn-primary btn-sm" href="{{ url_for('condition_detail', slug=cond.slug) }}">View Full Details</a>
+            <a class="btn btn-outline btn-sm" href="{{ url_for('doctors', dept=cond.department_slug) }}">Specialists</a>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

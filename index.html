@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}CarePulse Hospital — Complete Patient Health Information{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <h1>Everything You Need for Your Health, In One Place</h1>
+      <p>Search trusted medical guides, evaluate symptoms, check lab preparation steps, book specialists, and access your lab reports &amp; prescriptions anytime.</p>
+      <form class="hero-search" action="{{ url_for('health_library') }}" method="get">
+        <input type="text" name="q" placeholder="Search diseases, symptoms (e.g. fever, migraine, diabetes)..." aria-label="Search health topics" />
+        <button class="btn btn-primary" type="submit">Search Health Guide</button>
+      </form>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:20px;">
+        <a class="btn btn-outline" href="{{ url_for('symptom_checker') }}">Check Symptoms Now</a>
+        <a class="btn btn-outline" href="{{ url_for('book_appointment') }}">Book Appointment</a>
+      </div>
+    </div>
+
+    <div class="hero-card">
+      <span class="badge">24/7 Care &amp; Diagnostics</span>
+      <h3 style="margin-top:10px;color:#fff;">CarePulse Patient Hub</h3>
+      <p style="margin-bottom:8px;">Instant access to hospital departments, verified doctors, and your personal health timeline.</p>
+      <div class="stat-grid">
+        <div class="stat-box">
+          <strong>{{ doctor_count }}</strong>
+          <span>Specialist Doctors</span>
+        </div>
+        <div class="stat-box">
+          <strong>{{ condition_count }}+</strong>
+          <span>Condition Guides</span>
+        </div>
+        <div class="stat-box">
+          <strong>24/7</strong>
+          <span>Emergency &amp; Trauma</span>
+        </div>
+        <div class="stat-box">
+          <strong>4–12 hrs</strong>
+          <span>Digital Lab Reports</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <h2>Featured Health Conditions &amp; Care Guides</h2>
+        <p>Clear explanations of causes, symptoms, warning signs, tests, and prevention.</p>
+      </div>
+      <a class="btn btn-outline" href="{{ url_for('health_library') }}">View Full A–Z Library</a>
+    </div>
+    <div class="grid-3">
+      {% for cond in featured_conditions %}
+      <article class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;">
+          <span class="badge">{{ cond.department_name }}</span>
+          <span class="badge {% if 'Emergency' in cond.urgency %}badge-danger{% elif 'Urgent' in cond.urgency %}badge-warning{% endif %}">{{ cond.urgency }}</span>
+        </div>
+        <h3>{{ cond.name }}</h3>
+        <p class="card-muted">{{ cond.summary }}</p>
+        <p style="font-size:0.86rem;"><strong>Common symptoms:</strong> {{ cond.symptoms[:3] | join(', ') }}</p>
+        <a class="btn btn-outline btn-sm" href="{{ url_for('condition_detail', slug=cond.slug) }}">Read Complete Guide</a>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section" style="background:#f1f5f9;">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <h2>Hospital Departments &amp; Specialties</h2>
+        <p>Find the right wing, floor location, and specialist extension instantly.</p>
+      </div>
+      <a class="btn btn-outline" href="{{ url_for('departments') }}">All Departments &amp; Labs</a>
+    </div>
+    <div class="grid-3">
+      {% for dept in departments %}
+      <div class="card">
+        <span class="badge {% if dept.is_emergency %}badge-danger{% endif %}">{{ dept.floor_location }}</span>
+        <h3 style="margin-top:8px;">{{ dept.name }}</h3>
+        <p class="card-muted">{{ dept.tagline }}</p>
+        <p style="font-size:0.88rem;"><strong>Direct Desk:</strong> {{ dept.phone_ext }}</p>
+        <a class="btn btn-primary btn-sm" href="{{ url_for('doctors', dept=dept.slug) }}">View Doctors</a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <h2>Preventive Health Checkup Packages</h2>
+        <p>Transparent pricing, included tests, and exact pre-test preparation instructions.</p>
+      </div>
+      <a class="btn btn-outline" href="{{ url_for('departments') }}#packages">All Lab Packages</a>
+    </div>
+    <div class="grid-3">
+      {% for pkg in packages %}
+      <div class="card">
+        <span class="badge">{{ pkg.category }}</span>
+        <h3 style="margin-top:8px;">{{ pkg.name }}</h3>
+        <p style="font-size:1.3rem;font-weight:800;color:var(--primary);margin:6px 0;">Rs. {{ pkg.price }}</p>
+        <p class="card-muted">{{ pkg.preparation_notes }}</p>
+        <p style="font-size:0.86rem;"><strong>Includes:</strong> {{ pkg.included_tests[:4] | join(', ') }}...</p>
+        <a class="btn btn-outline btn-sm" href="{{ url_for('book_appointment') }}">Schedule Checkup</a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}{{ condition.name }} — CarePulse Health Guide{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <p style="margin-bottom:14px;"><a href="{{ url_for('health_library') }}">&larr; Back to Health Library</a></p>
+
+    <div class="card" style="margin-bottom:24px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
+        <span class="badge">{{ condition.department_name }} &middot; {{ condition.floor_location }}</span>
+        <span class="badge {% if 'Emergency' in condition.urgency %}badge-danger{% elif 'Urgent' in condition.urgency %}badge-warning{% endif %}">Care Priority: {{ condition.urgency }}</span>
+      </div>
+      <h1 style="margin:0 0 10px;">{{ condition.name }}</h1>
+      <p style="font-size:1.05rem;color:var(--text-muted);margin:0;">{{ condition.summary }}</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Common Symptoms</h3>
+        <ul>
+          {% for s in condition.symptoms %}
+            <li>{{ s }}</li>
+          {% endfor %}
+        </ul>
+        <h3>Causes &amp; Risk Factors</h3>
+        <p class="card-muted">{{ condition.causes }}</p>
+      </div>
+
+      <div class="card" style="border-color:#fecaca;background:#fffafa;">
+        <h3 style="color:#991b1b;">Emergency Warning Signs (When to Seek Immediate Help)</h3>
+        <ul>
+          {% for rf in condition.red_flags %}
+            <li><strong>{{ rf }}</strong></li>
+          {% endfor %}
+        </ul>
+        <p style="font-size:0.9rem;color:#991b1b;">If you experience any of these warning signs, call <strong>{{ hospital_hotline }}</strong> or go directly to our Emergency Wing ({{ condition.floor_location }}).</p>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:22px;">
+      <div class="card">
+        <h3>Diagnosis &amp; Recommended Tests</h3>
+        <ul>
+          {% for t in condition.diagnosis_tests %}
+            <li>{{ t }}</li>
+          {% endfor %}
+        </ul>
+        <h3>Treatment &amp; Care Approach</h3>
+        <p class="card-muted">{{ condition.treatment }}</p>
+      </div>
+
+      <div class="card">
+        <h3>Prevention &amp; Daily Self-Care</h3>
+        <p class="card-muted">{{ condition.prevention }}</p>
+        <hr style="border:none;border-top:1px solid var(--border);margin:16px 0;" />
+        <h3>Hospital Department Desk</h3>
+        <p class="card-muted">{{ condition.department_name }} &middot; {{ condition.floor_location }} &middot; {{ condition.phone_ext }}</p>
+        <a class="btn btn-outline btn-sm" href="{{ url_for('health_tools') }}">Open Health Calculators</a>
+      </div>
+    </div>
+
+    <div style="margin-top:32px;">
+      <h2>Specialists for {{ condition.name }}</h2>
+      <div class="grid-3">
+        {% for doc in doctors %}
+        <div class="card">
+          <h3>{{ doc.name }}</h3>
+          <p style="font-weight:600;color:var(--primary);margin:4px 0;">{{ doc.qualification }}</p>
+          <p class="card-muted">{{ doc.specialty }} &middot; {{ doc.experience_years }} yrs exp.</p>
+          <p style="font-size:0.88rem;">Available: {{ doc.available_days }} &middot; Fee: Rs. {{ doc.consultation_fee }}</p>
+          <a class="btn btn-primary btn-sm" href="{{ url_for('book_appointment', doctor_id=doc.id) }}">Book Consultation</a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

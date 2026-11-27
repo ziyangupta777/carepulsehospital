@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Patient Portal Sign In — CarePulse Hospital{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container" style="max-width:480px;">
+    <div class="card">
+      <h1 style="margin-top:0;">Patient Health Portal Sign In</h1>
+      <p class="card-muted">View your lab reports, active prescriptions, vitals timeline, and booked appointments.</p>
+
+      <div class="alert alert-info" style="font-size:0.88rem;">
+        <strong>Demo Patient Account:</strong><br />
+        Email: <code>patient@carepulse.org</code><br />
+        Password: <code>Patient@123</code>
+      </div>
+
+      <form method="post" action="{{ url_for('login') }}">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input class="form-control" id="email" type="email" name="email" required value="patient@carepulse.org" />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input class="form-control" id="password" type="password" name="password" required value="Patient@123" />
+        </div>
+        <button class="btn btn-primary" style="width:100%;" type="submit">Sign In to Portal</button>
+      </form>
+
+      <p style="margin-top:16px;text-align:center;font-size:0.92rem;">
+        New patient? <a href="{{ url_for('register') }}">Create a free Patient Account</a>
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

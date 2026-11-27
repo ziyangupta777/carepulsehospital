@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Doctors Directory — CarePulse Hospital{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <h1>Find a Specialist Doctor</h1>
+        <p>Browse physician qualifications, spoken languages, consultation fees, and book online slots.</p>
+      </div>
+      <a class="btn btn-primary" href="{{ url_for('book_appointment') }}">Book Appointment</a>
+    </div>
+
+    <div class="card" style="margin-bottom:22px;">
+      <form method="get" action="{{ url_for('doctors') }}" class="form-grid" style="align-items:end;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="q">Search Doctor or Specialty</label>
+          <input class="form-control" id="q" name="q" value="{{ q }}" placeholder="e.g. Cardiology, Diabetes, Dr. Meera..." />
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label for="dept">Department</label>
+          <select class="form-control" id="dept" name="dept">
+            <option value="">All Departments</option>
+            {% for d in departments %}
+              <option value="{{ d.slug }}" {% if selected_dept == d.slug %}selected{% endif %}>{{ d.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-primary" type="submit">Filter Doctors</button>
+          <a class="btn btn-outline" href="{{ url_for('doctors') }}">Reset</a>
+        </div>
+      </form>
+    </div>
+
+    <div class="grid-2">
+      {% for doc in doctors %}
+      <article class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;">
+          <span class="badge">{{ doc.department_name }}</span>
+          <span class="badge">{{ doc.experience_years }} Years Exp.</span>
+        </div>
+        <h3>{{ doc.name }}</h3>
+        <p style="font-weight:600;color:var(--primary);margin:2px 0 8px;">{{ doc.qualification }} &middot; {{ doc.specialty }}</p>
+        <p class="card-muted">{{ doc.bio }}</p>
+        <p style="font-size:0.88rem;margin:8px 0;">
+          <strong>Schedule:</strong> {{ doc.available_days }} &middot;
+          <strong>Location:</strong> {{ doc.floor_location }}<br />
+          <strong>Languages:</strong> {{ doc.languages }} &middot;
+          <strong>Fee:</strong> Rs. {{ doc.consultation_fee }}
+        </p>
+        <a class="btn btn-primary btn-sm" href="{{ url_for('book_appointment', doctor_id=doc.id) }}">Book with {{ doc.name.split()[1] }}</a>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

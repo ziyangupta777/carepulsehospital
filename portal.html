@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% block title %}Patient Health Portal — {{ current_patient.full_name }}{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="portal-header">
+      <div>
+        <span class="badge">Personal Health Record</span>
+        <h1 style="margin:6px 0 4px;">{{ current_patient.full_name }}</h1>
+        <p class="card-muted" style="margin:0;">
+          DOB: {{ current_patient.date_of_birth }} &middot;
+          Gender: {{ current_patient.gender }} &middot;
+          Blood Group: <strong>{{ current_patient.blood_group }}</strong>
+        </p>
+        <p style="font-size:0.88rem;margin:6px 0 0;">
+          <strong>Allergies:</strong> {{ current_patient.allergies }} &middot;
+          <strong>Emergency Contact:</strong> {{ current_patient.emergency_contact }}
+        </p>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a class="btn btn-primary" href="{{ url_for('book_appointment') }}">Book New Appointment</a>
+        <a class="btn btn-outline" href="{{ url_for('symptom_checker') }}">Symptom Checker</a>
+      </div>
+    </div>
+
+    {% if vitals %}
+      {% set latest = vitals[0] %}
+      <div class="kpi-strip">
+        <div class="kpi-card">
+          <small>Latest Blood Pressure</small>
+          <strong>{{ latest.systolic }}/{{ latest.diastolic }} mmHg</strong>
+        </div>
+        <div class="kpi-card">
+          <small>Resting Heart Rate</small>
+          <strong>{{ latest.heart_rate }} bpm</strong>
+        </div>
+        <div class="kpi-card">
+          <small>Blood Glucose</small>
+          <strong>{{ latest.blood_sugar }} mg/dL</strong>
+        </div>
+        <div class="kpi-card">
+          <small>Oxygen (SpO2)</small>
+          <strong>{{ latest.spo2 }}%</strong>
+        </div>
+        <div class="kpi-card">
+          <small>Weight</small>
+          <strong>{{ latest.weight_kg }} kg</strong>
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Lab Reports &amp; Diagnostics</h3>
+        {% if not reports %}
+          <p class="card-muted">No lab reports recorded yet.</p>
+        {% else %}
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Test Panel</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for rep in reports %}
+                <tr>
+                  <td>{{ rep.report_date }}</td>
+                  <td>
+                    <strong>{{ rep.test_name }}</strong><br />
+                    <small class="card-muted">{{ rep.report_code }} &middot; {{ rep.ordered_by }}</small>
+                  </td>
+                  <td>
+                    <span class="badge {% if rep.overall_status == 'Normal' %}badge-success{% else %}badge-warning{% endif %}">{{ rep.overall_status }}</span>
+                  </td>
+                  <td><a class="btn btn-outline btn-sm" href="{{ url_for('view_report', report_id=rep.id) }}">View</a></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="card">
+        <h3>Log Home Vitals</h3>
+        <form method="post" action="{{ url_for('log_vitals') }}">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="systolic">Systolic BP</label>
+              <input class="form-control" id="systolic" name="systolic" type="number" required value="122" />
+            </div>
+            <div class="form-group">
+              <label for="diastolic">Diastolic BP</label>
+              <input class="form-control" id="diastolic" name="diastolic" type="number" required value="80" />
+            </div>
+            <div class="form-group">
+              <label for="heart_rate">Heart Rate (bpm)</label>
+              <input class="form-control" id="heart_rate" name="heart_rate" type="number" required value="72" />
+            </div>
+            <div class="form-group">
+              <label for="blood_sugar">Blood Sugar (mg/dL)</label>
+              <input class="form-control" id="blood_sugar" name="blood_sugar" type="number" required value="98" />
+            </div>
+            <div class="form-group">
+              <label for="spo2">SpO2 (%)</label>
+              <input class="form-control" id="spo2" name="spo2" type="number" required value="98" />
+            </div>
+            <div class="form-group">
+              <label for="weight_kg">Weight (kg)</label>
+              <input class="form-control" id="weight_kg" name="weight_kg" type="number" step="0.1" required value="74.0" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="notes">Notes</label>
+            <input class="form-control" id="notes" name="notes" placeholder="e.g. Fasting morning reading" />
+          </div>
+          <button class="btn btn-primary btn-sm" type="submit">Save Vitals Reading</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:24px;">
+      <h3>Active &amp; Past Prescriptions</h3>
+      {% if not prescriptions %}
+        <p class="card-muted">No prescriptions on file.</p>
+      {% else %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Medication</th>
+                <th>Schedule &amp; Duration</th>
+                <th>Prescribed By</th>
+                <th>Instructions</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for rx in prescriptions %}
+              <tr>
+                <td><strong>{{ rx.medication_name }}</strong> ({{ rx.dosage }})</td>
+                <td>{{ rx.frequency }} &middot; {{ rx.duration }}</td>
+                <td>{{ rx.prescribed_by }}<br /><small class="card-muted">{{ rx.prescribed_date }}</small></td>
+                <td>{{ rx.instructions }}</td>
+                <td><span class="badge {% if rx.status == 'Active' %}badge-success{% elif rx.status == 'Refill Requested' %}badge-warning{% endif %}">{{ rx.status }}</span></td>
+                <td>
+                  {% if rx.status == 'Active' %}
+                    <form method="post" action="{{ url_for('request_refill', rx_id=rx.id) }}">
+                      <button class="btn btn-outline btn-sm" type="submit">Request Refill</button>
+                    </form>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="card" style="margin-top:24px;">
+      <h3>My Appointments</h3>
+      {% if not appointments %}
+        <p class="card-muted">No appointments scheduled yet.</p>
+      {% else %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date &amp; Time</th>
+                <th>Doctor &amp; Department</th>
+                <th>Mode</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for appt in appointments %}
+              <tr>
+                <td><strong>{{ appt.appointment_date }}</strong><br />{{ appt.time_slot }}</td>
+                <td>{{ appt.doctor_name }}<br /><small class="card-muted">{{ appt.department_name }}</small></td>
+                <td>{{ appt.visit_type }}</td>
+                <td>{{ appt.reason }}</td>
+                <td>
+                  <span class="badge {% if appt.status == 'Confirmed' %}badge-success{% elif appt.status == 'Cancelled' %}badge-danger{% endif %}">{{ appt.status }}</span>
+                </td>
+                <td>
+                  {% if appt.status == 'Confirmed' %}
+                    <form method="post" action="{{ url_for('cancel_appointment', appt_id=appt.id) }}">
+                      <button class="btn btn-outline btn-sm" type="submit">Cancel</button>
+                    </form>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

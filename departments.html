@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Departments, Emergency & Lab Packages — CarePulse Hospital{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="alert alert-danger">
+      <strong>24/7 Emergency &amp; Ambulance Response:</strong> Call <strong>{{ hospital_hotline }}</strong> &middot; Ground Floor, North Wing. Always open for chest pain, breathing emergencies, stroke symptoms, trauma, and poisonings.
+    </div>
+
+    <div class="section-header" style="margin-top:24px;">
+      <div>
+        <h1>Hospital Clinical Departments</h1>
+        <p>Wing locations, direct phone extensions, and specialist care overview.</p>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      {% for dept in departments %}
+      <div class="card">
+        <span class="badge {% if dept.is_emergency %}badge-danger{% endif %}">{{ dept.floor_location }}</span>
+        <h3 style="margin-top:8px;">{{ dept.name }}</h3>
+        <p style="font-weight:600;color:var(--primary);margin:4px 0;">{{ dept.tagline }}</p>
+        <p class="card-muted">{{ dept.description }}</p>
+        <p style="font-size:0.88rem;"><strong>Direct Desk:</strong> {{ dept.phone_ext }}</p>
+        <a class="btn btn-outline btn-sm" href="{{ url_for('doctors', dept=dept.slug) }}">Meet Specialists</a>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="section-header" id="packages" style="margin-top:48px;">
+      <div>
+        <h2>Diagnostic Lab Tests &amp; Checkup Packages</h2>
+        <p>Includes fasting rules, preparation guidance, and turnaround times for digital reports.</p>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      {% for pkg in packages %}
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+          <span class="badge">{{ pkg.category }}</span>
+          <span class="badge {% if pkg.fasting_required %}badge-warning{% else %}badge-success{% endif %}">
+            {% if pkg.fasting_required %}Fasting Required{% else %}No Fasting Needed{% endif %}
+          </span>
+        </div>
+        <h3 style="margin-top:10px;">{{ pkg.name }}</h3>
+        <p style="font-size:1.25rem;font-weight:800;color:var(--primary);margin:4px 0;">Rs. {{ pkg.price }} &middot; <small style="font-weight:500;color:var(--text-muted);">Results in {{ pkg.turnaround_hours }} hrs</small></p>
+        <p class="card-muted"><strong>Preparation:</strong> {{ pkg.preparation_notes }}</p>
+        <ul style="font-size:0.9rem;">
+          {% for test in pkg.included_tests %}
+            <li>{{ test }}</li>
+          {% endfor %}
+        </ul>
+        <a class="btn btn-primary btn-sm" href="{{ url_for('book_appointment') }}">Book Sample Collection</a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
